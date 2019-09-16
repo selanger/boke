@@ -1,0 +1,57 @@
+{% extends 'base.html' %}
+{% block js_css %}
+    <link href="/static/css/main.css" rel="stylesheet">
+{% endblock %}
+
+{% block content %}
+    <div class="container">
+        <div class="con_content">
+            <div class="about_box">
+                <h2 class="nh1"><span>您现在的位置是：<a href="/" target="_blank">网站首页</a>>><a href="#" target="_blank">个人日记</a></span><b>个人日记</b>
+                </h2>
+                <div class="dtxw box">
+                    {#          {% for one in article %}#}
+                    {% for one in page_obj %}
+
+                        <li>
+                            <div class="dttext f_l">
+                                <ul>
+                                    <h2><a href="/articledetails/{{ one.id }}">{{ one.title }}</a></h2>
+                                    <p>{{ one.description | safe }}</p>
+                                    <span>{{ one.date }}</span>
+                                </ul>
+                            </div>
+                            <div class="xwpic f_r"><a href="/"><img src="/static/{{ one.picture }}"></a></div>
+                        </li>
+                    {% endfor %}
+
+
+                </div>
+                {#      <div class="pagelist">页次：1/1 每页25 总数10#}
+                {#          <a href="/">首页</a>#}
+                {#          <a href="/">上一页</a>#}
+                {#          <a href="/">下一页</a>#}
+                {#          <a href="/">尾页</a>#}
+                {#      </div>#}
+                <div class="pagelist">
+                    {#        {% for page in paginator.page_range %}#}
+                <a href="/newslistpic/1">首页</a>
+                {% if page_obj.has_previous %}
+                    <a href="/newslistpic/{{ page_obj.previous_page_number }}">上一页</a>
+                {% endif %}
+                    {% for page in page_range %}
+                        <a href="/newslistpic/{{ page }}">{{ page }}</a>
+                    {% endfor %}
+                {% if page_obj.has_next %}
+                    <a href="/newslistpic/{{ page_obj.next_page_number }}">下一页</a>
+                {% endif %}
+                <a href="/newslistpic/{{ paginator.num_pages }}">尾页</a>
+                </div>
+            </div>
+        </div>
+        <div class="blank"></div>
+        <!-- container代码 结束 -->
+
+    </div>
+{% endblock %}
+
