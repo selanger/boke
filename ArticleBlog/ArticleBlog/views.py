@@ -98,3 +98,106 @@ def gender_demo(request):
     print (gender)
 
     return HttpResponse("性别测试")
+
+def reqtest(request):
+    ## 获取get请求传递的参数
+    # data = request.GET
+    ## 获取post 的请求参数
+    data = request.POST
+    print (data)
+    print (data.get("name"))
+    print (type(data.get("name")))
+    print (data.get("age"))
+
+    return HttpResponse("姓名：%s年龄%s" %(data.get("name"),data.get("age")))
+    # ## request包含请求信息的  请求对象
+    # # print (request)
+    # print (dir(request))
+    # # print (request.COOKIES)
+    # # print (request.FILES)
+    # print (request.GET)
+    # print (request.scheme)
+    # print (request.method)
+    # print (request.path)
+    # print (request.body)
+    # # meta = request.META
+    # # print (meta)
+    # # for key in meta:
+    # #     print(key)
+    # # print ("_____")
+    # # print (request.META.get('OS'))
+    # # print (request.META.get('HTTP_USER_AGENT'))
+    # # print (request.META.get('HTTP_HOST'))
+    # # print (request.META.get('HTTP_REFERER'))
+    #
+    #
+    # return HttpResponse("请求测试")
+
+
+def formtest(request):
+    ## get请求
+    # data = request.GET
+    # serach = data.get("serach")   ### 文章标题
+    # print (serach)
+    # ## 通过form提交的数据，判断数据库中是否存在某个文章
+    # ## 通过模型进行查询
+    # article = Article.objects.filter(title__contains=serach).all()
+    # print (article)
+
+    print(request.method)
+    data = request.POST
+    print (data.get('username'))
+    print (data.get("password"))
+
+    return render(request,"formtest.html",locals())
+    # return  render_to_response("formtest.html",locals())
+
+import hashlib
+def setPassword(password):
+    ## 实现一个密码加密
+    md5 = hashlib.md5()   ## 创建一个md5 的一个实例对象
+    md5.update(password.encode())   ## 进行加密
+    result = md5.hexdigest()
+    return result
+
+from Article.forms import Register
+# def register(request):
+#     regiter_form = Register()   ## 创建一个form表单类的实例对象
+#     if request.method == "POST":
+#         #  获取用户输入的数据
+#         # username = request.POST.get("username")
+#         username = request.POST.get("name")
+#         password= request.POST.get("password")
+#         ## 判断是否有数据
+#         content = "参数不全"
+#         if username and password:
+#             user = User()
+#             user.name = username
+#             ## 加密密码
+#             user.password = setPassword(password)
+#             user.save()
+#             content = "添加成功"
+#     return render(request,"register.html",locals())
+
+## 使用form表单进行验证 后端验证
+## 验证用户名是否包含 特殊字符  admin
+def register(request):
+    regiter_form = Register()   ## 创建一个form表单类的实例对象
+    error = ""
+    if request.method == "POST":
+        data = Register(request.POST)  ## 将post请求传递过来的数据，交给 form表单类进行校验
+        if data.is_valid():   ## 判断校验是否通过，  如果通过 返回一个True 否则 是Flase
+            clean_data = data.cleaned_data   ### 返回一个字典类型，数据通过校验的数据
+            ## 获取到数据，写库
+            username = clean_data.get("name")
+            password = clean_data.get("password")
+            user = User()
+            user.name = username
+            ## 加密密码
+            user.password = setPassword(password)
+            user.save()
+            error = "添加数据成功"
+        else:
+            error = data.errors
+            print (error)
+    return render(request,"register.html",locals())
