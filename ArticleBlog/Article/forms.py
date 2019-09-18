@@ -17,3 +17,14 @@ class Register(forms.Form):
         else:
             return name
 
+
+class csforms(forms.Form):
+    username = forms.CharField(max_length=8,min_length=6,label="姓名")
+
+    def clean_username(self):
+        username = self.cleaned_data.get("username")
+        ## 判断 username中是否包含 特殊字符    比如  G     adminG
+        if "G" in username:
+            self.add_error("username","不可以是%s" % username)
+        else:
+            return username

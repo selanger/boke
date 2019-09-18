@@ -1,4 +1,4 @@
-from django.http import HttpResponse
+from django.http import HttpResponse,JsonResponse
 from django.shortcuts import render
 from Article.models import *
 from django.core.paginator import Paginator
@@ -10,6 +10,11 @@ def test(request):
 def about(request):
     return render(request,"about.html")
 def index(request):
+
+    ## 获取cookie  获取了用户名
+    username = request.COOKIES.get("username")
+    print (username)
+
     """
     查询 6条数据
     查询推荐的7条数据
@@ -201,3 +206,114 @@ def register(request):
             error = data.errors
             print (error)
     return render(request,"register.html",locals())
+
+from Article.forms import *
+def cspost(request):
+    form_cspost = csforms()  ## 创建一个实例对象
+    if request.method =="POST":
+        clean_data = csforms(request.POST)
+        if clean_data.is_valid():   ### 校验成功   返回  True
+            data = clean_data.cleaned_data   ##
+            # username = request.POST.get("username")
+            username = data.get("username")
+            # print (username)
+            ## 校验用户   添加用户  等等
+            ## 操作数据库
+            content = "成功"
+        else:
+            content = clean_data.errors
+    return render(request,"cspost.html",locals())
+
+
+def ajax_get(request):
+    return render(request,"ajax_get.html")
+## ajax 完成一个 校验用户名  密码的案例
+def ajax_get_data(request):
+    result = {"code":10000,"content":""}
+    data = request.GET
+    username = data.get("username")
+    password = data.get("password")
+    if username is None or password is None:
+        result['code'] = 10001
+        result['content'] = "请求参数为空"
+    else:
+        user = User.objects.filter(name=username,password=setPassword(password)).first()
+        if user:
+            result['code'] = 10000
+            result['content'] = "用户可登陆"
+        else:
+            result['code'] = 10002
+            result['content'] = "用户不存在或者密码不正确"
+    ##  返回一个json对象
+    return JsonResponse(result)
+    # return HttpResponse("这个是ajax提交数据")
+
+def ajax_post(request):
+    ## 调用页面
+    return render(request,"ajax_post.html")
+def ajax_post_data(request):
+    ## 注册
+    result = {}
+    username = request.POST.get("username")
+    password = request.POST.get("password")
+    if len(username) == 0 or len(password) == 0:
+        result["code"] = 10001
+        result["content"] = '请求参数为空'
+    else:
+        ## 添加用户
+        user= User()
+        user.name = username
+        user.password= setPassword(password)
+        try:
+            user.save()
+            result["code"] = 10000
+            result["content"] = '添加数据成功'
+        except:
+            result["code"] = 10002
+            result["content"] = '添加数据错误'
+    ## 注册
+    return JsonResponse(result)
+
+
+def checkusername(request):
+    result = {'code':10001,"content":""}
+    #get 请求
+    username= request.GET.get("name")
+    print (username)
+    # 判断用户是否存在
+    user = User.objects.filter(name=username).first()
+    if user:
+        ## 存在
+        result = {'code': 10001, "content": "用户名已存在"}
+    else:
+        result = {'code': 10000, "content": "用户名不存在"}
+
+
+    return JsonResponse(result)
+
+
+## 重定向   300问题
+from django.http import HttpResponseRedirect
+def login(request):
+    if request.method == "POST":
+        username = request.POST.get("username")
+        password = request.POST.get("password")
+        ##校验
+        user = User.objects.filter(name=username).first()
+        if user:
+            ### 用户存在
+            if user.password == setPassword(password):
+                ## 密码正确
+                ## 跳转首页   状态码   300 重定向
+                # return HttpResponse("登录成功")
+                # return HttpResponseRedirect("/index/")
+                response = HttpResponseRedirect('/index/')
+                ## 下发cookie  设置cookie
+                response.set_cookie("username",username)
+
+                return response
+
+    return render(request,"login.html")
+
+
+

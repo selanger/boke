@@ -34,5 +34,12 @@ urlpatterns = [
     path("reqtest/",views.reqtest),
     path("formtest/",views.formtest),
     path("register/",views.register),
+    path("cspost/",views.cspost),
+    path("ajax_get/",views.ajax_get),
+    path("ajax_get_data/",views.ajax_get_data),
+    path("ajax_post/",views.ajax_post),
+    path("ajax_post_data/",views.ajax_post_data),
+    path("checkusername/",views.checkusername),
+    path("login/",views.login),
 
 ]
