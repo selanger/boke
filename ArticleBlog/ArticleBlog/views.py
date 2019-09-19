@@ -3,33 +3,49 @@ from django.shortcuts import render
 from Article.models import *
 from django.core.paginator import Paginator
 
+## 登录装饰器
+def loginVaild(fun):
+    def inner(request,*args,**kwargs):
+        username = request.COOKIES.get("username")
+        username_session = request.session.get("username")
+
+        if username:
+            return fun(request,*args,**kwargs)
+        else:
+            return HttpResponseRedirect("/login/")
+    return inner
 
 def test(request):
     return HttpResponse("test yemian ")
-
+@loginVaild
 def about(request):
-    return render(request,"about.html")
+    user_id = request.COOKIES.get("user_id")
+    user = User.objects.filter(id=user_id).first()
+    return render(request,"about.html",locals())
+
+@loginVaild
 def index(request):
 
     ## 获取cookie  获取了用户名
-    username = request.COOKIES.get("username")
-    print (username)
-
-    """
-    查询 6条数据
-    查询推荐的7条数据
-    查询点击率排行榜的12条数据
-    """
+    # username = request.COOKIES.get("username")
+    # print (username)
+    # if username:
     article = Article.objects.order_by("-date")[:6]
     recommend_article = Article.objects.filter(recommend=1).all()[:7]
     click_article = Article.objects.order_by("-click")[:12]
-
     return render(request,"index.html",locals())
+    # else:
+    #     return HttpResponseRedirect("/login/")
+
+
+
+
 def listpic(request):
     return render(request,"listpic.html")
-def newslistpic(request,page=1):
+def newslistpic(request,type,page=1):
     page = int(page)
-    article = Article.objects.order_by("-date")
+    # article = Article.objects.order_by("-date")
+    article = Type.objects.get(name=type).article_set.order_by("-date")
     paginator = Paginator(article,6)   ##每页显示6条数据
     page_obj = paginator.page(page)
     ## 获取当前页
@@ -294,6 +310,7 @@ def checkusername(request):
 
 ## 重定向   300问题
 from django.http import HttpResponseRedirect
+## 登录
 def login(request):
     if request.method == "POST":
         username = request.POST.get("username")
@@ -310,10 +327,28 @@ def login(request):
                 response = HttpResponseRedirect('/index/')
                 ## 下发cookie  设置cookie
                 response.set_cookie("username",username)
+                response.set_cookie("user_id",user.id)
+
+
+                request.session['username']=username
 
                 return response
 
     return render(request,"login.html")
+
+## 登出
+def logout(request):
+    response = HttpResponseRedirect("/index/")
+    response.delete_cookie("username")
+    ## 删除session   目的是 用户再次使用相同的sessionid 进行访问，拿到的session的值是不一样的
+    # del request.session["username"]   ### 删除指定session  删除的是保存在服务器上面session的值
+    request.session.flush()  ## 删除所有的session
+
+    return response
+
+
+
+
 
 
 

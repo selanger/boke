@@ -24,7 +24,7 @@ urlpatterns = [
     path('index/', views.index,name="index"),
     path('listpic/', views.listpic),
     path('newslistpic/', views.newslistpic),
-    re_path('newslistpic/(?P<page>\d+)', views.newslistpic),
+    re_path('newslistpic/(?P<type>\w+)/(?P<page>\d+)', views.newslistpic),
     path('base/', views.base),
     path('addarticle/', views.addarticle),
     path('fytest/', views.fytest),
@@ -41,5 +41,6 @@ urlpatterns = [
     path("ajax_post_data/",views.ajax_post_data),
     path("checkusername/",views.checkusername),
     path("login/",views.login),
+    path("logout/",views.logout),
 
 ]
