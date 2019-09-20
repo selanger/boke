@@ -1,0 +1,153 @@
+{% extends "base.html" %}
+{% block title %}
+    商品列表
+{% endblock %}
+{% block style %}
+    <script src="/static/js/vue.min.js"></script>
+    <script src="/static/js/vue-resource.js"></script>
+{% endblock %}
+
+{% block label %}
+    商品列表
+{% endblock %}
+
+{% block content %}
+    {% verbatim %}
+    <div id="content">
+        <table class="table">
+            <thead>
+            <tr>
+                <th>商品编号</th>
+                <th>商品名称</th>
+                <th>商品价格</th>
+                <th>商品数量</th>
+                <th>商品产地</th>
+                <th>商品保质期</th>
+                <th>操作</th>
+            </tr>
+            </thead>
+            <tbody>
+
+            <tr v-for="one in goods_list">
+                <td>{{ one.goods_number }}</td>
+                <td>{{ one.goods_name }}</td>
+                <td>{{ one.goods_price }}</td>
+                <td>{{ one.goods_count }}</td>
+                <td>{{ one.goods_location }}</td>
+                <td>{{ one.goods_safe_date }}</td>
+                <td>
+                    <button class="btn btn-primary">修改</button>
+
+                    <button class="btn btn-warning">下架</button>
+
+                </td>
+            </tr>
+
+            </tbody>
+            <tfoot></tfoot>
+        </table>
+
+        <ul style="float:right; margin-right: 50px" class="pagination">
+
+
+            <li class="paginate_button page-item previous" v-for="page in page_range">
+
+                <a class="page-link" v-bind:href="page" >{{ page }}</a>
+
+            </li>
+
+
+        </ul>
+    </div>
+    {% endverbatim %}
+
+{% endblock %}
+
+
+{% block script %}
+    <script>
+        Vue.use(VueResource);   //  申明 使用 vue_resource
+        var vue = new Vue(
+            {
+                // vue 只能进行静态数据的绑定，构建一堆静态数据
+                //   完成发送一个get请求，从api接口中获取数据，渲染到指定页面上面
+                el: "#content",
+                data: {
+                    goods_list: [
+                        //
+                        {
+                            "goods_number": "00001",
+                            "goods_name": "山西大白菜",
+                            "goods_price": "100",
+                            "goods_count": "200",
+                            "goods_location": "陕西",
+                            "goods_safe_date": "1"
+                        },
+                        {
+                            "goods_number": "00002",
+                            "goods_name": "北京大萝卜",
+                            "goods_price": "100",
+                            "goods_count": "100",
+                            "goods_location": "东北",
+                            "goods_safe_date": "1"
+                        },
+                        {
+                            "goods_number": "00003",
+                            "goods_name": "东北粉条",
+                            "goods_price": "90",
+                            "goods_count": "100",
+                            "goods_location": "河北",
+                            "goods_safe_date": "1"
+                        },
+                        {
+                            "goods_number": "00004",
+                            "goods_name": "河南烩面",
+                            "goods_price": "100",
+                            "goods_count": "200",
+                            "goods_location": "河南",
+                            "goods_safe_date": "1"
+                        },
+                        {
+                            "goods_number": "00005",
+                            "goods_name": "兰州拉面",
+                            "goods_price": "100",
+                            "goods_count": "300",
+                            "goods_location": "北京",
+                            "goods_safe_date": "1"
+                        },
+                        {
+                            "goods_number": "00006",
+                            "goods_name": "山东大葱",
+                            "goods_price": "100",
+                            "goods_count": "400",
+                            "goods_location": "山东",
+                            "goods_safe_date": "1"
+                        },
+                    ],
+                    page_range: [1, 2, 3, 4, 5],
+                },
+                created:function () {
+                    // 发送请求
+                    url = '/goods_list_api/1/1/',
+                    //
+                    this.$http.get(url).then(
+                        function (data) {
+                            console.log(data['data']['data']);
+                            // 绑定数据
+                            this.goods_list =data['data']['data'];  // 将api返回的商品种类绑定到 goods_list 里面
+                            this.page_range = data['data']['page_range'];  //  将api接口返回的 页数 绑定到 page_range 里面
+                        },   // success
+                        function (err) {
+                            console.log(err)
+                        }
+                        //  相对于 ajax 中的 error
+
+                    )
+
+                }
+            }
+        )
+
+    </script>
+
+{% endblock %}
