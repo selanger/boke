@@ -70,6 +70,7 @@ def login(request):
                     ## 设置cookie
                     response  = HttpResponseRedirect("/index/")
                     response.set_cookie("username",user.username)
+                    response.set_cookie("userid",user.id)
                     request.session['username'] = user.username  ## 设置session
                     return response
                 else:
@@ -203,3 +204,155 @@ def goods_status(request,status,id):
 ## 目的 提供页面
 def api_goods_list(request):
     return render(request,"api_goods_list.html")
+
+
+
+from django.views import View
+import json
+## 类视图
+class GoodsView(View):
+    ## 统一返回格式，重写__init方法
+    def __init__(self):
+        super(GoodsView, self).__init__()
+        ## 构造一个返回的格式
+        self.result = {
+            "version":"v1.0",
+            "code":200,
+            "data":""
+        }
+        self.obj = Goods
+    ## 处理请求    get  post  put  delete
+    def get(self,request):
+        ## 处理get请求
+        ## 返回商品
+        id = request.GET.get("id")
+        if id:
+            ## 查询指定id的商品
+            goods = self.obj.objects.get(id= id)   ## 对象
+            data = {
+                "goods_number": goods.goods_number,
+                "goods_name": goods.goods_name,
+                "goods_price": goods.goods_price,
+                "goods_count": goods.goods_count,
+                "goods_location": goods.goods_location,
+                "goods_safe_date": goods.goods_safe_date,
+                "goods_pro_time": goods.goods_pro_time,
+            }
+
+        else:
+            goods = self.obj.objects.all()
+            data = []
+            for one in goods:
+                ## one 是一个对象
+                data.append({
+                    "goods_number":one.goods_number,
+                    "goods_name":one.goods_name,
+                    "goods_price":one.goods_price,
+                    "goods_count":one.goods_count,
+                    "goods_location":one.goods_location,
+                    "goods_safe_date":one.goods_safe_date,
+                    "goods_pro_time":one.goods_pro_time,
+                })
+        self.result['data'] = data
+        return JsonResponse(self.result)
+    def post(self,request):
+        """
+          处理post请求
+          用来保存数据
+        :param request:
+        :return:
+        """
+        data = request.POST
+        goods = self.obj()
+        goods.goods_number = data.get("goods_number")
+        goods.goods_name = data.get("goods_name")
+        goods.goods_price = data.get("goods_price")
+        goods.goods_count = data.get("goods_count")
+        goods.goods_location = data.get("goods_location")
+        goods.goods_safe_date = data.get("goods_safe_date")
+        goods.goods_status = data.get("goods_status")
+        goods.save()
+        self.result["data"] = {
+            "id":goods.id,
+            "data":"保存成功"
+        }
+        return JsonResponse(self.result)
+    def put(self,request):
+        """
+            处理put请求
+            更新数据
+            更新指定id的商品的名字
+        :param request:
+        :return:
+        """
+        # data = request.body  bytes - string    decode  encode
+        ## request.body 是一个bytes 类型
+        ## json.loads 需要一个string类型  bytes - 》string
+        data = json.loads(request.body.decode())
+        print (data)
+        ## 需要将获取到值 json.loads
+        id = data.get("id")
+        goodsname = data.get("goodsname")
+        ## 更新商品的名字
+        goods = self.obj.objects.get(id=id)
+        goods.goods_name = goodsname
+        goods.save()
+        self.result["data"] = {
+            "id":id,
+            "data":"商品名字更新成功"
+        }
+        return JsonResponse(self.result)
+    def delete(self, request):
+        """
+        ## 处理delete请求
+        删除数据   获取商品id 然后将该商品删除
+        :param request:
+        :return:
+        """
+        data = json.loads(request.body.decode())
+        id = data.get("id")
+        ## 删除操作
+        self.obj.objects.filter(id=id).delete()
+        self.result["data"] = {
+            "id": id,
+            "data": "商品删除成功"
+        }
+
+        return JsonResponse(self.result)
+
+from rest_framework import viewsets,mixins
+from LoginUser.serializer import *
+class GoodsViewSet(mixins.CreateModelMixin,
+                   mixins.RetrieveModelMixin,
+                   mixins.UpdateModelMixin,
+                   mixins.DestroyModelMixin,
+                   mixins.ListModelMixin,
+                   viewsets.GenericViewSet):
+    queryset = Goods.objects.all()   ## queryset 固定写法
+    serializer_class = GoodsSerializers     ###
+
+
+
+class UserViewSet(viewsets.ModelViewSet):
+    queryset = LoginUser.objects.all()   ## queryset 固定写法
+    serializer_class = UserSerializers     ###
+
+@LoginVaild
+def personal_info(request):
+    ##
+    user_id = request.COOKIES.get("userid")
+    print (user_id)
+    user = LoginUser.objects.filter(id = user_id).first()
+    if request.method == "POST":
+        ## 获取 数据，保存数据
+        data = request.POST
+        print (data.get("email"))
+        user.username = data.get("username")
+        user.phone_number = data.get("phone_number")
+        user.age = data.get("age")
+        user.gender = data.get("gender")
+        user.address = data.get("address")
+        user.photo = request.FILES.get("photo")
+        user.save()
+        print (data)
+    return render(request,"personal_info.html",locals())

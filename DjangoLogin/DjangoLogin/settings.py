@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'LoginUser',
+    'rest_framework',
 ]
 
 MIDDLEWARE = [
@@ -125,3 +126,11 @@ STATICFILES_DIRS = (
 ## 媒体文件
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR,'static')
+
+
+REST_FRAMEWORK = {
+    "DEFAULT_PERMISSION_CLASSES":[
+        'rest_framework.permissions.DjangoModelPermissionsOrAnonReadOnly'
+    ]
+}
+

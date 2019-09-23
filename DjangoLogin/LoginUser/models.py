@@ -20,7 +20,7 @@ class Goods(models.Model):
     goods_name = models.CharField(max_length=32)
     goods_price = models.FloatField()
     goods_count = models.IntegerField()
-    goods_location = models.CharField(max_length=254)
+    goods_location = models.CharField(max_length=254,verbose_name="产地")
     goods_safe_date = models.IntegerField()
     goods_status = models.IntegerField()  ## 0 代表下架  1 代表在售
     goods_pro_time = models.DateField(auto_now=True,verbose_name="生产日期")

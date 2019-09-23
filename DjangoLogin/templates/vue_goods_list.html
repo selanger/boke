@@ -52,7 +52,7 @@
 
             <li class="paginate_button page-item previous" v-for="page in page_range">
 
-                <a class="page-link" v-bind:href="page" >{{ page }}</a>
+                <a class="page-link" v-on:click="getgoods(page)" >{{ page }}</a>
 
             </li>
 
@@ -144,6 +144,30 @@
 
                     )
 
+                },
+                methods:{
+                    "getgoods":function (page) {
+                        // 发送一个get请求  获取指定页的数据
+                        url = '/goods_list_api/1/'+page,
+
+                    this.$http.get(url).then(
+                        function (data) {
+                            console.log(data['data']['data']);
+                            // 绑定数据
+                            this.goods_list =data['data']['data'];  // 将api返回的商品种类绑定到 goods_list 里面
+                            this.page_range = data['data']['page_range'];  //  将api接口返回的 页数 绑定到 page_range 里面
+                        },   // success
+                        function (err) {
+                            console.log(err)
+                        }
+                        //  相对于 ajax 中的 error
+
+                    )
+
+
+
+
+                    }
                 }
             }
         )
