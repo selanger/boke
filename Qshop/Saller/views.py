@@ -43,6 +43,7 @@ def register(request):
                 user.email = email
                 user.username = email
                 user.password = setPassword(password)
+                user.user_type = 0
                 user.save()
             else:
                 error_msg = "邮箱已经被注册，请登录"
@@ -161,5 +162,34 @@ def personal_info(request):
         user.save()
         print (data)
     return render(request,"saller/personal_info.html",locals())
+
+@LoginVaild
+def goods_add(request):
+    ###  处理post请求，获取数据，保存数据，返回响应
+    goods_type = GoodsType.objects.all()
+    if request.method == "POST":
+        data = request.POST
+        print (data)
+        goods = Goods()
+        goods.goods_number = data.get("goods_number")
+        goods.goods_name = data.get("goods_name")
+        goods.goods_price = data.get("goods_price")
+        goods.goods_count = data.get("goods_count")
+        goods.goods_location = data.get("goods_location")
+        goods.goods_safe_date = data.get("goods_safe_date")
+        goods.picture = request.FILES.get("picture")
+        goods.goods_status = 1
+        goods.save()
+        goods_type = request.POST.get("goods_type")   ## select 标签的value  类型是 string
+        # goods.goods_type_id = int(goods_type)
+        goods.goods_type = GoodsType.objects.get(id = goods_type)  ## 保存类型
+        ## 保存店铺
+        ## 从cookie中获取到用户信息
+        user_id = request.COOKIES.get("userid")
+        goods.goods_store = LoginUser.objects.get(id = user_id)
+        goods.save()
+    return render(request,"saller/goods_add.html",locals())
+
+
 
 

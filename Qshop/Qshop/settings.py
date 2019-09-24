@@ -123,6 +123,10 @@ STATIC_URL = '/static/'
 STATICFILES_DIRS = (
     os.path.join(BASE_DIR,'static'),
 )
+### 这条配置跟STATICFILES_DIRS，MEDIA_URL，MEDIA_ROOT这三个冲突。
+## 在做静态文件收集的时候需要，如果收集完成之后，将下面这条注掉
+# STATIC_ROOT = os.path.join(BASE_DIR,"static")
+
 ## 媒体文件
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR,'static')
