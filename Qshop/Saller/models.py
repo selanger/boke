@@ -33,6 +33,7 @@ class Goods(models.Model):
     goods_status = models.IntegerField(verbose_name="状态")  ## 0 代表下架  1 代表在售
     goods_pro_time = models.DateField(auto_now=True,verbose_name="生产日期")
     picture = models.ImageField(upload_to="images")   ## 商品图片
+    goods_description = models.TextField(default="好好。。。。。")
     ## 类型  一对多
     goods_type = models.ForeignKey(to=GoodsType,on_delete=models.CASCADE,default=1)
     ## 店铺 一对多

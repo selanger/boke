@@ -5,6 +5,7 @@
 
 {% block label %}
     商品列表
+    <a href="/Saller/goods_add/">增加商品</a>
 {% endblock %}
 
 {% block content %}
@@ -33,9 +34,9 @@
                     <button class="btn btn-primary">修改</button>
                     {#                    <button class="btn btn-warning">下架</button>#}
                     {% if one.goods_status == 1 %}
-                        <a href="/goods_status/down/{{ one.id }}" type="button" class="btn btn-warning">下架</a>
+                        <a href="/Saller/goods_status/down/{{ one.id }}" type="button" class="btn btn-warning">下架</a>
                     {% else %}
-                        <a href="/goods_status/up/{{ one.id }}" type="button" class="btn btn-warning">上架</a>
+                        <a href="/Saller/goods_status/up/{{ one.id }}" type="button" class="btn btn-warning">上架</a>
 
                     {% endif %}
                 </td>

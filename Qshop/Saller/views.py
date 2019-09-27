@@ -59,7 +59,7 @@ def login(request):
         email = request.POST.get("email")
         password = request.POST.get("password")
         if email:
-            user = LoginUser.objects.filter(email=email).first()
+            user = LoginUser.objects.filter(email=email,user_type=0).first()
             if user:
                 ## 存在
                 if user.password == setPassword(password):

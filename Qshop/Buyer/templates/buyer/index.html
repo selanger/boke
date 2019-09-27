@@ -51,7 +51,7 @@
 				<a href="#">加州提子</a>
 				<a href="#">亚马逊牛油果</a>
 			</div>
-			<a href="/Buyer/goods_list/?keywords={{ ty.type.id }}" class="goods_more fr" id="fruit_more">查看更多 ></a>
+			<a href="/Buyer/goods_list/?keywords={{ ty.type.id }}&req_type=findall" class="goods_more fr" id="fruit_more">查看更多 ></a>
 		</div>
 		<div class="goods_con clearfix">
 			<div class="goods_banner fl"><img src="/static/{{ ty.type.type_picture }}"></div>
@@ -59,7 +59,7 @@
                 {% for goods in ty.goods %}
 				<li>
 					<h4><a href="#">{{ goods.goods_name }}</a></h4>
-					<a href="#"><img src="/static/{{ goods.picture }}"></a>
+					<a href="/Buyer/detail/{{ goods.id }}"><img src="/static/{{ goods.picture }}"></a>
 					<div class="prize">¥{{ goods.goods_price }}</div>
 				</li>
                     {% endfor %}
