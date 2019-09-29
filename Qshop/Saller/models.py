@@ -40,6 +40,13 @@ class Goods(models.Model):
     goods_store = models.ForeignKey(to=LoginUser,on_delete=models.CASCADE,default=1)
 
 
+class Vaild_Code(models.Model):
+    code_content = models.CharField(max_length=8,verbose_name="验证码")
+    code_time = models.CharField(max_length=32,verbose_name="创建时间")
+    code_status = models.IntegerField(verbose_name="状态")    ##1 使用  0 未使用
+    code_user = models.EmailField(verbose_name="邮箱")
+
+
 
 
 

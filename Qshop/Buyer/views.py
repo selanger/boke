@@ -193,7 +193,7 @@ def place_order_more(request):
             cart_id = key.split("_")[2]
             # print("%s ++++++++  %s" %(goods_id,count))
             request_data.append((int(goods_id),int(count),int(cart_id)))
-    print (request_data)
+    # print (request_data)
     if request_data:
         ## 保存数据
         ##   保存订单表   订单详情表
@@ -262,7 +262,7 @@ def AlipayViews(request):
     ##   发送支付请求
     ## 请求地址  支付网关 + 实例化订单
     result = "https://openapi.alipaydev.com/gateway.do?" + order_string
-    print(result)
+    # print(result)
 
     return HttpResponseRedirect(result)
 

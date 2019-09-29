@@ -53,11 +53,14 @@ def register(request):
     return render(request,"saller/register.html",locals())
 
 ## 登录
+import datetime
+import time
 def login(request):
     if request.method == "POST":
         error_msg = ""
         email = request.POST.get("email")
         password = request.POST.get("password")
+        code = request.POST.get("vaild_code")
         if email:
             user = LoginUser.objects.filter(email=email,user_type=0).first()
             if user:
@@ -68,11 +71,26 @@ def login(request):
                     # error_msg = "登录成功"
                     # return HttpResponseRedirect('/index/')
                     ## 设置cookie
-                    response  = HttpResponseRedirect("/Saller/index/")
-                    response.set_cookie("username",user.username)
-                    response.set_cookie("userid",user.id)
-                    request.session['username'] = user.username  ## 设置session
-                    return response
+
+                    ## 判断验证码   从库里取验证码
+                    vaild_code = Vaild_Code.objects.filter(code_status=0,code_user=email,code_content=code).first()
+                    ## 判断时间  有效期2分钟  当前时间 - code创建时间 <= 2min
+                    # now = time.time()
+                    now = time.mktime(datetime.datetime.now().timetuple())
+                    db_time = datetime.datetime.strptime(vaild_code.code_time, "%Y-%m-%d %H:%M:%S")
+                    db_time = time.mktime(db_time.timetuple())
+                    #
+                    if (now - db_time)/ 60 > 2:
+                        ## 超时
+                        error_msg = "验证码超时"
+                    else:
+                        response  = HttpResponseRedirect("/Saller/index/")
+                        response.set_cookie("username",user.username)
+                        response.set_cookie("userid",user.id)
+                        request.session['username'] = user.username  ## 设置session
+                        vaild_code.code_status = 1
+                        vaild_code.save()
+                        return response
                 else:
                     error_msg = "密码错误"
             else:
@@ -189,6 +207,76 @@ def goods_add(request):
         goods.goods_store = LoginUser.objects.get(id = user_id)
         goods.save()
     return render(request,"saller/goods_add.html",locals())
+
+
+import smtplib
+from email.mime.text import MIMEText
+
+def send_email(params):
+    ## params   字典类型
+    """
+    :param params:   字典
+        subject  主题
+        content  邮件内容
+        toemail  收件人 列表
+    :return:
+    """
+    subject = params.get("subject")
+    content = params.get("content")
+    sender = "str_wjp@163.com"
+    rec = params.get("toemail")
+    password = "qaz123"
+    message = MIMEText(content,"plain","utf-8")
+    message["Subject"] = subject
+    message["From"] = sender   ## 发件人
+    message["To"] = str(rec)   ## 收件人
+    try:
+        smtp = smtplib.SMTP_SSL("smtp.163.com",465)
+        smtp.login(sender,password)
+        smtp.sendmail(sender,rec,message.as_string())
+        smtp.close()
+        return True
+    except:
+        return False
+
+import random
+def get_code(request):
+    result = {"code":10000,"msg":""}
+    ## 获取email
+    email = request.GET.get("email")
+    print(email)
+    ##  判断用户是否存在
+    if email:
+        ## 判断  email 是否有值
+        flag = LoginUser.objects.filter(email = email).exists()
+        if flag:
+            ## 用户存在
+            ##发送验证码
+            ##
+            code = random.randint(1000,9999)   ## 4位
+            content = "您的验证码是%s,打死不要告诉别人"% (code)
+            params = dict(subject="登录验证码",content = content,toemail=[email])
+            eflag = send_email(params)
+            if eflag:
+                ## 保存验证码到数据库
+                vaile_code = Vaild_Code()
+                vaile_code.code_content = code
+                vaile_code.code_status = 0
+                vaile_code.code_user = email
+                now = datetime.datetime.now()
+                vaile_code.code_time = now.strftime("%Y-%m-%d %H:%M:%S")
+                vaile_code.save()
+                result = {"code": 10000, "msg": "验证码发送成功"}
+            else:
+                result = {"code": 10003, "msg": "未知错误，联系客服"}
+        else:
+            ## 用户不存在
+            result = {"code": 10002, "msg": "用户不存在"}
+    else:
+        result = {"code": 10001, "msg": "邮箱不能为空"}
+    return JsonResponse(result)
+
+
 
 
 
