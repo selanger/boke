@@ -145,7 +145,7 @@ MIIEowIBAAKCAQEAtexG8P2qyi04DUrUEQnbpfCYS7im27E0q55gsDiE+g/JdWwJJ3/I2PRPbyz38ah2
 import djcelery    ## 导入djcelery包
 djcelery.setup_loader()   ## 进行模块载入
 BROKER_URL='redis://127.0.0.1:6379/1'  ## 中间件  中间人  指定redis
-BACKEND_URL='redis://127.0.0.1:6379/2'
+CELERY_RESULT_BACKEND ='redis://127.0.0.1:6379/2'
 CELERY_IMPORTS=('CeleryTask.tasks') ##  具体的任务文件
 CELERY_TIMEZONE='Asia/Shanghai'   ## celery时区  跟django保持一致
 ## diango-celery的处理器，是固定的
