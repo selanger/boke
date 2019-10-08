@@ -29,6 +29,9 @@ class PayOrder(models.Model):
     order_user = models.ForeignKey(to= LoginUser,on_delete=models.CASCADE,verbose_name="订单用户")## 外键  链接到  用户表
 
 
+
+
+
 ## 订单详情表
 class OrderInfo(models.Model):
     order_id = models.ForeignKey(to=PayOrder,on_delete=models.CASCADE,verbose_name="订单表外键")

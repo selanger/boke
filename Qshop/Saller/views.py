@@ -239,12 +239,53 @@ def send_email(params):
     except:
         return False
 
+# import random
+# def get_code(request):
+#     result = {"code":10000,"msg":""}
+#     ## 获取email
+#     email = request.GET.get("email")
+#     print(email)
+#     ##  判断用户是否存在
+#     if email:
+#         ## 判断  email 是否有值
+#         flag = LoginUser.objects.filter(email = email).exists()
+#         if flag:
+#             ## 用户存在
+#             ##发送验证码
+#             ##
+#             code = random.randint(1000,9999)   ## 4位
+#             content = "您的验证码是%s,打死不要告诉别人"% (code)
+#             params = dict(subject="登录验证码",content = content,toemail=[email])
+#             eflag = send_email(params)
+#             if eflag:
+#                 ## 保存验证码到数据库
+#                 vaile_code = Vaild_Code()
+#                 vaile_code.code_content = code
+#                 vaile_code.code_status = 0
+#                 vaile_code.code_user = email
+#                 now = datetime.datetime.now()
+#                 vaile_code.code_time = now.strftime("%Y-%m-%d %H:%M:%S")
+#                 vaile_code.save()
+#                 result = {"code": 10000, "msg": "验证码发送成功"}
+#             else:
+#                 result = {"code": 10003, "msg": "未知错误，联系客服"}
+#         else:
+#             ## 用户不存在
+#             result = {"code": 10002, "msg": "用户不存在"}
+#     else:
+#         result = {"code": 10001, "msg": "邮箱不能为空"}
+#     return JsonResponse(result)
+
+
+
+from CeleryTask.tasks import send_code
 import random
 def get_code(request):
     result = {"code":10000,"msg":""}
     ## 获取email
     email = request.GET.get("email")
     print(email)
+    phone = "xxxxxxxx"
     ##  判断用户是否存在
     if email:
         ## 判断  email 是否有值
@@ -252,31 +293,27 @@ def get_code(request):
         if flag:
             ## 用户存在
             ##发送验证码
-            ##
-            code = random.randint(1000,9999)   ## 4位
-            content = "您的验证码是%s,打死不要告诉别人"% (code)
-            params = dict(subject="登录验证码",content = content,toemail=[email])
-            eflag = send_email(params)
-            if eflag:
-                ## 保存验证码到数据库
-                vaile_code = Vaild_Code()
-                vaile_code.code_content = code
-                vaile_code.code_status = 0
-                vaile_code.code_user = email
-                now = datetime.datetime.now()
-                vaile_code.code_time = now.strftime("%Y-%m-%d %H:%M:%S")
-                vaile_code.save()
-                result = {"code": 10000, "msg": "验证码发送成功"}
-            else:
-                result = {"code": 10003, "msg": "未知错误，联系客服"}
+            code = random.randint(1000,9999)   ## 4
+            ## 发送短信验证码
+            ## 发送短信验证码的任务
+            params = dict(phone=phone,code=code)
+            send_code.delay(params)
+            ## 保存验证码到数据库
+            vaile_code = Vaild_Code()
+            vaile_code.code_content = code
+            vaile_code.code_status = 0
+            vaile_code.code_user = email
+            now = datetime.datetime.now()
+            vaile_code.code_time = now.strftime("%Y-%m-%d %H:%M:%S")
+            vaile_code.save()
+            result = {"code": 10000, "msg": "验证码发送成功"}
+
         else:
             ## 用户不存在
             result = {"code": 10002, "msg": "用户不存在"}
     else:
         result = {"code": 10001, "msg": "邮箱不能为空"}
     return JsonResponse(result)
-
-
 
 
 

@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'Buyer',
     'Saller',
+    'djcelery',
 ]
 
 MIDDLEWARE = [
@@ -113,7 +114,7 @@ USE_I18N = True
 
 USE_L10N = True
 
-USE_TZ = True
+USE_TZ = False
 
 
 # Static files (CSS, JavaScript, Images)
@@ -139,4 +140,29 @@ MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAtexG8P2qyi04DUrUEQnbpfCYS7im27E0q55g
 alipay_private_key_string = """-----BEGIN RSA PRIVATE KEY-----
 MIIEowIBAAKCAQEAtexG8P2qyi04DUrUEQnbpfCYS7im27E0q55gsDiE+g/JdWwJJ3/I2PRPbyz38ah2mv66GFdE4j2nXarL3jSgoP995mZzmllGLDSOWbFI2QB+7ZMikVFXzjWZ68FcQMEJExuC7ikD4vuY8J4Wt00NerbSwKCWL4CjvV3CxcBaJXPn3kIOzItX0yDToK9rvZ9E4P1PIURe96Q/SNz+GkJaR32PQJotUOrsg0gVdWhSBIjRuSpvUpUlPEZrzprhyYn/zZ6TktKaURzfVqSpRa0h+Z9y03sIIDVLSWRlaDKw81WsVKfJlUcN9WA/uypMOOQb6MXolZEYMRm+EDgEFT0oUQIDAQABAoIBAGDUC8ZFHdxSSR06ELmo55HhBw52j8kq/n/B4nCpBI4cTPwErrKpXvuqvYTNCINFSSuiHObLvEw2yJggSjZRCJXoptg0+57RmXn51zKCG+X0T5qfz6xNAVEuUmibGEEW/X+ACyY8CmeLxpF7c1fI2T3RhUclsgpCi+REvWCHyvNXYIj5S8c3+KBXGzdmmwv97PTtkkMW4K2QDG9wcimZU/stUrtsx8vBm9T4TmDz3BiXnCHoJDJCx5j9R8MlrT2hD2HdwxjZzMNBveHNdDK2mWrCVnzNzJiUnBPxh0ObJU+Qf9g32Gmyn/8QZbRDDiN6az+NWiMJx/ikPQTB4QWdYckCgYEA8YSEAVCU8bTmRDS//uOB6sGzt1KDG3fmTuSuupoJT4FC7UiUg0eo3ZfvqHrowkVccEgRgKCtUpWNrR1SzheXvc8QajeLqGP3dk5vI2naseqCE1nhqW0i8BRezjrPiWxkzG4aNO2BLTco+ZV7AJYW0E0hMW2YDu9kqrCRzV2PVZcCgYEAwNTvwwEFW2LZwv8gzITqg9S71phz0u4DSvkvlm57FO2G/RWwp5S7ukvLPgOgVHVymFsfUQy2J0HcvqFysvyJulj+PHK9onddnm8msrLsUG66ui1QrIUP06p2v98IaG2jKJxFCX79XPr67UgKXq8kX/s491NkHq774pdUy9InvlcCgYBnp2b8JXh3MBtvhHAuVbgpZ87Yy/nm7ROUIoN3JKsAS0rNCcxrd3La/91korOIxToCGnwgh1U7z2HJvX8PYoLGfLrfy00ODTFkvg7m1QR+PVZsNbQrAeLvxN5XhlgR88pjDpICyzgYjsbwLx5mRwQtjBzF2PJc3pOGylcZG6FrqwKBgQCUoQwU0Cqi37RdGmzbdu+ToVsO8v8Da7VaCmtllc6EuPg9BoTdBkUUOOt05zKjJsunJ0UiIZwc8iUFQke4MfKukX2UdhQ4r6yXO7EmN8bx0AdZDSiLcRxb154kEfLXGvqRiLGluh3rlv/l+IsVpAVzfZ3Q9JPNGq7HXkFbwKYljQKBgGO9dozcq7hspOEsM+tlN2Z21SxM3mK+udOntXw+xD3iSbksiI9GOmHs09Np/95TN21lwl1h7r40/5rxC6s0cfrPd+7c0QhsgM9yOE1onkazY5DLmGDaW979HZLuB1y4V2ksw2ttJfirRtHPYRBcHS/XVmEzTUGk4zfqA4lkQ15x
 -----END RSA PRIVATE KEY-----"""
+
+
+import djcelery    ## 导入djcelery包
+djcelery.setup_loader()   ## 进行模块载入
+BROKER_URL='redis://127.0.0.1:6379/1'  ## 中间件  中间人  指定redis
+BACKEND_URL='redis://127.0.0.1:6379/2'
+CELERY_IMPORTS=('CeleryTask.tasks') ##  具体的任务文件
+CELERY_TIMEZONE='Asia/Shanghai'   ## celery时区  跟django保持一致
+## diango-celery的处理器，是固定的
+CELERYBEAT_SCHEDULER='djcelery.schedulers.DatabaseScheduler'
+
+from celery.schedules import timedelta,crontab
+
+CELERYBEAT_SCHEDULE = {
+    u'测试任务': {
+        "task":"CeleryTask.tasks.test",   ## 任务函数
+        "schedule":timedelta(seconds=1)    ## 执行时间  隔一秒执行一次
+    }
+}
+
+
+
+
+
+
 

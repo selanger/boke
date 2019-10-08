@@ -333,6 +333,14 @@ def user_center_order(request):
     return render(request,"buyer/user_center_order.html",locals())
 
 
+from CeleryTask.tasks import *
+def reqtest(request):
+    ## 执行celery任务
+    # test.delay() ## 发布任务
+    name = request.GET.get("name")
+    age = request.GET.get("age")
+    myprint.delay(name,age)
+    return HttpResponse("req ceshi ")
 
 
 

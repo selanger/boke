@@ -13,6 +13,7 @@ urlpatterns = [
     path("payresult/",payresult),
     path("add_cart/",add_cart),
     path("cart/",cart),
+    path("reqtest/",reqtest),
     path("place_order_more/",place_order_more),
     path("user_center_order/",user_center_order),
     re_path("detail/(?P<id>\d+)",detail),
