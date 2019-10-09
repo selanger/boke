@@ -1,0 +1,11 @@
+[2019-10-09 10:14:17]:division by zero
+[2019-10-09 10:14:24]:division by zero
+[2019-10-09 10:14:28]:division by zero
+[2019-10-09 10:49:19]:'HttpResponse' object has no attribute 'render'
+[2019-10-09 10:52:13]:'HttpResponse' object has no attribute 'render'
+[2019-10-09 10:52:13]:'HttpResponse' object has no attribute 'render'
+[2019-10-09 10:52:14]:'HttpResponse' object has no attribute 'render'
+[2019-10-09 10:52:14]:'HttpResponse' object has no attribute 'render'
+[2019-10-09 10:54:28]:'HttpResponse' object has no attribute 'render'
+[2019-10-09 15:42:00]:local variable 'goods' referenced before assignment
+[2019-10-09 15:42:18]:local variable 'goods' referenced before assignment

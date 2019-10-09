@@ -317,4 +317,16 @@ def get_code(request):
 
 
 
+def ormobjectstest(request):
+    ###  对goods模型进行操作
+    # data=Goods.objects.all()
+    ##  queryset  全部的数据   全部的字段
+    data = Goods.objects.myfilter()
+    print (data)
+
+
+
+    return HttpResponse("ormobjectstest")
+
+
 

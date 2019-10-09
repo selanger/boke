@@ -1,8 +1,10 @@
 {% extends "buyer/base.html" %}
+{% load cache %}
 {% block title %}
     首页
 {% endblock %}
 
+{% cache 500 hsqcache %}
 {% block contnet %}
 	<div class="navbar_con">
 		<div class="navbar">
@@ -70,3 +72,4 @@
     {% endfor %}
 
 {% endblock %}
+{% endcache %}

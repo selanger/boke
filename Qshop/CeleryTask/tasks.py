@@ -17,6 +17,7 @@ def myprint(name,age):
 @app.task
 def send_email(params):
     ##  发送邮件的代码 发送短信
+    ##
     return "send email"
 
 @app.task

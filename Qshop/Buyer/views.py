@@ -23,8 +23,11 @@ def LoginVaild(func):
             return HttpResponseRedirect('/Buyer/login/')
     return inner
 # Create your views here.
+from django.views.decorators.cache import cache_page
 ## 首页
+@cache_page(60*20)    ## 视图中使用缓存， 缓存寿命20分钟
 def index(request):
+
     goods_type = GoodsType.objects.all()
     result = []
     for type in goods_type:
@@ -119,6 +122,8 @@ def goods_list(request):
     elif req_type == "search":
         ### 搜索功能
         goods = Goods.objects.filter(goods_name__contains=keywords).all()
+    else:
+        goods = Goods.objects.all()
     ## 从 商品集中切片
     end = len(goods) // 5
     end += 1
@@ -343,5 +348,30 @@ def reqtest(request):
     return HttpResponse("req ceshi ")
 
 
+
+def myporcess_tem_rep(request):
+    def test():
+        return HttpResponse("my test")
+    rep = HttpResponse("myporcess_tem_rep")
+    rep.render = test
+    return rep
+
+from django.core.cache import cache
+def cache_test(request):
+    ## 请求进来
+    ## 从cache提取数据
+    ##  根据订单order_number  获取定单总价 order_total
+    order_number = request.GET.get("order_number")
+    data = cache.get(order_number)
+    print ("------------------")
+    ## 如果没有数据，数据查询，增加到缓存中
+    if not data:   ## 如果缓存中没有数据
+        print ("++++++++++++++++++")
+        payorder = PayOrder.objects.filter(order_number = order_number).first()
+        ## 将数据写入 cache
+        cache.set(order_number,payorder.order_total,60)   ## key  value
+        ### 返回结果
+        data = payorder.order_total
+    return HttpResponse("order_total %s" % data)
 
 
