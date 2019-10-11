@@ -18,7 +18,7 @@
 
                 {% for one in paryorder %}
 				<ul class="order_list_th w978 clearfix">
-					<li class="col01">{{ one.order_date }}</li>
+					<li class="col01">{{ one.order_date | date:"Y-m-d" }}</li>
 					<li class="col02">订单号：{{ one.order_number }}</li>
 					<li class="col02 stress">{{ one.get_order_status_display }}</li>
 				</ul>

@@ -98,11 +98,74 @@ def login(request):
         else:
             error_msg = "邮箱不可以为空"
     return render(request,"saller/login.html",locals())
+import calendar
+import datetime
+def get_day():
+    """
+    获取每月的第一天和最后一天的日期
+    :return:   date
+    """
+    now = datetime.datetime.now()
+    year = now.year
+    month = now.month
+    last_day = calendar.monthrange(year, month)[1]  ## 最后一天
+    start = datetime.date(year, month, 1)
+    end = datetime.date(year, month, last_day)
+    return start,end
 
+
+
+from django.db.models import *
 ## 首页
 @LoginVaild
 def index(request):
-    return render(request,"saller/index.html")
+    user_id = request.COOKIES.get("userid")    ###获取卖家id
+    ## 查询订单详情
+    # order_info = OrderInfo.objects.filter(store_id=LoginUser.objects.get(id = user_id)).all()
+    ##当月成交额
+    ##   获取当前月份
+    ##   查询当前月份下的订单详情
+          ### 日期 在订单表中，跟订单详情表是 一对多关系
+    ### 首先获取当前年    当前月    当前天   获取当前月的最后一天
+    ## 拼接（string) -> date
+    start,end = get_day()
+    payorder = PayOrder.objects.filter(order_date__range = [start,end])   ## 当前日期下面所有的订单
+    # print (payorder)
+    order_info = OrderInfo.objects.filter(store_id = LoginUser.objects.get(id = user_id),order_id__in=payorder).exclude(status__in=[0,4])
+    ## 聚合
+    sum_all = order_info.aggregate(Sum("goods_total_price"),Count("id"),Sum("goods_count"))
+    print(sum_all)
+
+    sum_money = sum_all.get("goods_total_price__sum")
+    sum_count = sum_all.get("id__count")
+    sum_goods_count = sum_all.get("goods_count__sum")
+
+    if sum_money is None:
+        sum_money=0
+
+
+    ## 返回当月销量最高的单品
+    # result = {}
+    # for one in order_info:
+    #     goods_info = one.goods  ##正向查询
+    #     goods_id = goods_info.id
+    #     if goods_id in result.keys():
+    #         result[goods_id] += one.goods_count
+    #     else:
+    #         result[goods_id] = one.goods_count
+    #
+    # result = max(result, key=lambda x: result[x])
+    # result = Goods.objects.get(id=result)
+    # result = result.goods_name
+    data = OrderInfo.objects.exclude(status__in=[0,4]).values("goods").annotate(goods_num=Sum("goods_count")).order_by("-goods_num").first()
+    result = data.get("goods")   ## goods_id
+    result = Goods.objects.get(id=result)
+    result = result.goods_name
+
+
+        # .values("goods_num")
+
+    return render(request,"saller/index.html",locals())
 
 ## 登出
 def logout(request):
@@ -198,9 +261,9 @@ def goods_add(request):
         goods.picture = request.FILES.get("picture")
         goods.goods_status = 1
         goods.save()
-        goods_type = request.POST.get("goods_type")   ## select 标签的value  类型是 string
-        # goods.goods_type_id = int(goods_type)
-        goods.goods_type = GoodsType.objects.get(id = goods_type)  ## 保存类型
+        goods_type_id = request.POST.get("goods_type")   ## select 标签的value  类型是 string
+        # goods.goods_type_id = int(goods_type_id)
+        goods.goods_type = GoodsType.objects.get(id = goods_type_id)  ## 保存类型
         ## 保存店铺
         ## 从cookie中获取到用户信息
         user_id = request.COOKIES.get("userid")
@@ -294,10 +357,11 @@ def get_code(request):
             ## 用户存在
             ##发送验证码
             code = random.randint(1000,9999)   ## 4
+            print (code)
             ## 发送短信验证码
             ## 发送短信验证码的任务
             params = dict(phone=phone,code=code)
-            send_code.delay(params)
+            # send_code.delay(params)
             ## 保存验证码到数据库
             vaile_code = Vaild_Code()
             vaile_code.code_content = code
@@ -328,5 +392,83 @@ def ormobjectstest(request):
 
     return HttpResponse("ormobjectstest")
 
+from Buyer.models import *
+## 商品订单
+@LoginVaild
+def order(request,status):
+    ## status  订单状态   字符串 0 1 2 3
+    status = int(status)
+    ## 查询该用户的所有订单
+    ## 获取登录用户
+    ##      cookie
+    user_id = request.COOKIES.get("userid")
+    user = LoginUser.objects.get(id= user_id)
+    # ## 这个卖家的订单详情
+    order_info = OrderInfo.objects.filter(store_id=user,status=status).all()
+
+    ## 根据卖家id 找到订单详情
+    # order_info = OrderInfo.objects.filter(store_id=1).first()
+    # print (order_info)
+    # payorder = order_info.order_id
+    #
+    # print (payorder)
+    # buyer_user = payorder.order_user
+    # print (buyer_user)
+    # print (buyer_user.id)
+    # ## 反向  找地址
+    # buyer_address = buyer_user.useradress_set.first()
+    # print (buyer_address.user_address)
+
+    # address = order_info.order_id.order_user.useradress_set.first()
+    # print (address.user_address)
+    return render(request,"saller/order.html",locals())
+
+
+def sendemail(request):
+    """
+    前端使用ajax 发出请求
+    :param request:
+    :return:
+    """
+    ## 订单详情id
+    order_info_id = request.GET.get("order_info_id")
+    ## 找到买家的邮箱
+    ##使用异步发送邮件
+    ## 发送邮件
+    return HttpResponse("发送邮件成功")
+
+
+def seller_caozuo(request):
+    """
+    拒绝订单
+    立即发货
+    :param request:
+    :type:
+            jujue
+                修改订单详情状态
+            fahuo
+    :return:
+    """
+    type = request.GET.get("type")
+    order_info_id =request.GET.get("order_info_id")  ##
+    order_info = OrderInfo.objects.get(id =order_info_id)
+    if type == "jujue":
+        order_info.status = 4
+        order_info.save()
+    elif type == "fahuo":
+        order_info.status = 2
+        order_info.save()
+
+    url = "/Saller/order/0"    ### 修改为自动获取请求来源
+    return HttpResponseRedirect(url)
+
+
+def myorderby(request):
+    ## 订单详情中所有商品的销售数量
+    data = OrderInfo.objects.annotate("goods")
+    print(data)
+    ##  select * from
+
+    return HttpResponse("组查询")
 
 

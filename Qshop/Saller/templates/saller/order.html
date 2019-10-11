@@ -1,0 +1,71 @@
+{% extends "saller/base.html" %}
+{% block title %}
+    订单列表
+{% endblock %}
+
+{% block label %}
+    订单列表
+{% endblock %}
+
+{% block content %}
+    <table class="table">
+        <thead>
+        <tr>
+            <th>订单编号</th>
+            <th>订单商品</th>
+            <th>商品数量</th>
+            <th>收货地址</th>
+            <th>收货人</th>
+            <th>订单总价</th>
+            <th>操作</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for one in order_info %}
+            <tr>
+                <td>{{ one.order_id.order_number }}</td>
+                <td>{{ one.goods.goods_name }}</td>
+                <td>{{ one.goods_count }}</td>
+                <td>{{ one.order_id.order_user.useradress_set.first.user_address }}</td>
+                <td>{{ one.order_id.order_user.useradress_set.first.user_name }}</td>
+                <td>{{ one.goods_total_price }}</td>
+                <td>
+                    {% if one.status == 0 %}
+                        <a href="#" type="button" class="btn btn-warning">提醒支付</a>
+                        <a href="/Saller/seller_caozuo/?type=jujue&order_info_id={{ one.id }}" type="button" class="btn btn-warning">拒绝订单</a>
+                    {% elif one.status == 1 %}
+                        <a href="/Saller/seller_caozuo/?type=fahuo&order_info_id={{ one.id }}" type="button" class="btn btn-warning">立即发货</a>
+                     {% elif one.status == 2 %}
+                        <a href="#" type="button" class="btn btn-warning">查看物流</a>
+                      {% elif one.status == 3 %}
+                        <a href="#" type="button" class="btn btn-warning">查看订单详情</a>
+                    {% endif %}
+
+                    {#                    <button class="btn btn-warning">下架</button>#}
+
+                </td>
+            </tr>
+        {% endfor %}
+        </tbody>
+        <tfoot></tfoot>
+    </table>
+
+    <ul style="float:right; margin-right: 50px" class="pagination">
+
+        {% for one in goods_all.page_range %}
+            <li class="paginate_button page-item previous">
+                {#                {% if one.goods_status == 1 %}#}
+                {% if status == "1" %}
+                    <a href="/goods_list/1/{{ one }}" class="page-link">{{ one }}</a>
+                {% else %}
+                    <a href="/goods_list/0/{{ one }}" class="page-link">{{ one }}</a>
+                {% endif %}
+            </li>
+        {% endfor %}
+
+    </ul>
+
+
+
+
+{% endblock %}

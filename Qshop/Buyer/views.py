@@ -5,7 +5,8 @@ from django.http import HttpResponse,JsonResponse,HttpResponseRedirect
 from Buyer.models import *
 from alipay import AliPay
 from Qshop.settings import alipay_private_key_string,alipay_public_key_string
-
+import logging
+collect = logging.getLogger("django")
 
 ## 登录装饰器
 def LoginVaild(func):
@@ -57,6 +58,7 @@ def login(request):
                     response.set_cookie("username",user.username)
                     response.set_cookie("userid",user.id)
                     request.session['username'] = user.username  ## 设置session
+                    collect.info("---------------%s is login-------------" % user.username)
                     return response
                 else:
                     error_msg = "密码错误"
@@ -276,7 +278,13 @@ def payresult(request):
     ## 通过get获取支付宝传递参数，获取其中的订单号，修改订单的状态
     order_number = request.GET.get("out_trade_no")
     paryorder = PayOrder.objects.get(order_number=order_number)
-    paryorder.order_status = 1
+    paryorder.order_status = 1    ## 修改订单状态
+    ## 修改订单详情的状态
+    ## 查询订单详情
+    order_info = paryorder.orderinfo_set.all()
+    for one in order_info:
+        one.status = 1
+        one.save()
     paryorder.save()
     return render(request,"buyer/payresult.html",locals())
 
@@ -373,5 +381,20 @@ def cache_test(request):
         ### 返回结果
         data = payorder.order_total
     return HttpResponse("order_total %s" % data)
+
+
+## 个人收货地址
+@LoginVaild
+def user_center_site(request):
+    if request.method == "POST":
+        address = UserAdress()
+        address.user_name = request.POST.get("user_name")
+        address.user_address = request.POST.get("user_address")
+        address.user_code = request.POST.get("user_code")
+        address.user_phone = request.POST.get("user_phone")
+        address.user = LoginUser.objects.get(id = request.COOKIES.get("userid"))
+        address.save()
+
+    return render(request,"buyer/user_center_site.html",locals())
 
 

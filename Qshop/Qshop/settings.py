@@ -84,7 +84,61 @@ DATABASES = {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
     }
+    # ,
+    # 'slave2': {
+    #     'ENGINE': 'django.db.backends.sqlite3',
+    #     'NAME': os.path.join(BASE_DIR, 'db3.sqlite3'),
+    # },
+    # 'slave3': {
+    #     'ENGINE': 'django.db.backends.sqlite3',
+    #     'NAME': os.path.join(BASE_DIR, 'db4.sqlite3'),
+    # }
 }
+
+
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.mysql',
+#         'NAME': 'Qshop',
+#         'USER': 'root',
+#         'PASSWORD': '123456',
+#         'HOST': '10.10.107.139',
+#         'PORT': '3306',
+#     },
+#     'slave': {
+#         'ENGINE': 'django.db.backends.mysql',
+#         'NAME': 'Qshop',
+#         'USER': 'root',
+#         'PASSWORD': '123456',
+#         'HOST': '10.10.107.102',
+#         'PORT': '3306',
+#     }
+# }
+
+### loging日志的配置
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,   ## 是否禁用之前的日志
+    'handlers': {
+        'file': {
+            'level': 'DEBUG',
+            'class': 'logging.FileHandler',
+            'filename': os.path.join(BASE_DIR,"debug.log")
+        },
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['file'],
+            'level': 'DEBUG',
+            'propagate': True,
+        },
+    },
+}
+
+
+
+
+
 
 
 # Password validation
@@ -149,6 +203,8 @@ CACHE_MIDDLEWARE_SECONDS = 600
 CACHE_MIDDLEWARE_ALIAS = 'default'
 
 
+
+# DATABASE_ROUTERS = ['mydbrouter.Router',]
 
 
 
